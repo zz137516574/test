@@ -97,11 +97,6 @@
 </template>
 
 <script>
-  import '../../static/jquery.mCustomScrollbar.concat.min.js';
-  import '../../static/jquery.mCustomScrollbar.min.css';
-  import '../../static/vhallSDK.js';
-  import '../../static/underscore-min.js';
-  import md5 from '../../static/md5.js';
   import sign from '../../static/sign.js';
 
   export default {
@@ -112,89 +107,80 @@
     components: {
     },
     mounted() {
-    },
-    methods: {
+      $("#exchange").click(function() {
+        $("#modal").show()
+      }),
 
-    }
-  };
+      $("#lines").on("click", "li", function() {
+        var t = $(this).text();
+        $(this).siblings("li").removeClass("active"),
+          $(this).addClass("active"),
+          VHALL_SDK.player.setPlayerLine(t),
+          $("#modal").hide(),
+          $(".help-tool").click()
+      }),
 
-  $(document).ready(function() {
+      $("#definitions").on("click", "li", function() {
+        var t = $(this).text();
+        $(this).siblings("li").removeClass("active"),
+          $(this).addClass("active"),
+          VHALL_SDK.player.setPlayerDefinition(t),
+          $("#modal").hide(),
+          $(".help-tool").click()
+      }),
 
-    $("#exchange").click(function() {
-      $("#modal").show()
-    }),
+      $(".header").on("click", "a", function() {
+        var t = $(this).attr("data-target");
+        $(".header a").removeClass("active"),
+          $(this).addClass("active"),
+          $(".tab-pane").removeClass("active"),
+          $("." + t).addClass("active"),
+          "notice-msg-box" == t || 'notice-note-box' == t ? $(".send-box").hide() : $(".send-box").show()
+      }),
 
-    $("#lines").on("click", "li", function() {
-      var t = $(this).text();
-      $(this).siblings("li").removeClass("active"),
-        $(this).addClass("active"),
-        VHALL_SDK.player.setPlayerLine(t),
-        $("#modal").hide(),
-        $(".help-tool").click()
-    }),
+      $("#userEvent").click(function() {
+        $("#userCusEvent").show(),
+          $("#userCusEvent .layer-textarea").val(JSON.stringify({
+            type: "xxx_event",
+            data: {
+              id: 1,
+              name: "test"
+            }
+          }))
+      }),
 
-    $("#definitions").on("click", "li", function() {
-      var t = $(this).text();
-      $(this).siblings("li").removeClass("active"),
-        $(this).addClass("active"),
-        VHALL_SDK.player.setPlayerDefinition(t),
-        $("#modal").hide(),
-        $(".help-tool").click()
-    }),
+      $("#userCusEvent img").click(function() {
+        $("#userCusEvent").hide()
+      }),
 
-    $(".header").on("click", "a", function() {
-      var t = $(this).attr("data-target");
-      $(".header a").removeClass("active"),
-        $(this).addClass("active"),
-        $(".tab-pane").removeClass("active"),
-        $("." + t).addClass("active"),
-        "notice-msg-box" == t || 'notice-note-box' == t ? $(".send-box").hide() : $(".send-box").show()
-    }),
+      $("#userCusEvent .layer-btn").click(function() {
+        try {
+          var t = JSON.parse($("#userCusEvent .layer-textarea").val());
+          VHALL_SDK.sendCustomEvent(t),
+            $("#userCusEvent img").click()
+        } catch(t) {
+          alert("JSON不合法")
+        }
+      }),
 
-    $("#userEvent").click(function() {
-      $("#userCusEvent").show(),
-        $("#userCusEvent .layer-textarea").val(JSON.stringify({
-          type: "xxx_event",
-          data: {
-            id: 1,
-            name: "test"
-          }
-        }))
-    }),
+      $("#userData").click(function() {
+        $("#userinfo").show()
+      }),
 
-    $("#userCusEvent img").click(function() {
-      $("#userCusEvent").hide()
-    }),
+      $("#userinfo img").click(function() {
+        $("#userinfo").hide()
+      }),
 
-    $("#userCusEvent .layer-btn").click(function() {
-      try {
-        var t = JSON.parse($("#userCusEvent .layer-textarea").val());
-        VHALL_SDK.sendCustomEvent(t),
-          $("#userCusEvent img").click()
-      } catch(t) {
-        alert("JSON不合法")
-      }
-    }),
+      $("#userinfo .layer-btn").click(function() {
+        var t = $("#userinfo .layer-textarea").val();
+        VHALL_SDK.updateUserInfo(t),
+          $("#userinfo img").click()
+      }),
 
-    $("#userData").click(function() {
-      $("#userinfo").show()
-    }),
+      $("#video").toggleClass("on"),
+      $("#doc").toggleClass("on")
 
-    $("#userinfo img").click(function() {
-      $("#userinfo").hide()
-    }),
-
-    $("#userinfo .layer-btn").click(function() {
-      var t = $("#userinfo .layer-textarea").val();
-      VHALL_SDK.updateUserInfo(t),
-        $("#userinfo img").click()
-    }),
-
-    $("#video").toggleClass("on"),
-    $("#doc").toggleClass("on")
-  });
-
-  var timestamp = Date.parse(new Date());
+      var timestamp = Date.parse(new Date());
   //    初始化
   VHALL_SDK.init({
     facedom: "#face",
@@ -377,8 +363,7 @@
     VHALL_SDK.on("getQuestionList",
       function(t) {
         if (200 == t.code) {
-          for (var o = "",
-                 n = t.data.length - 1; n >= 0; n--) o += e(t.data[n]);
+          for (var o = "",n = t.data.length - 1; n >= 0; n--){o += e(t.data[n])};
           $("#question-msg").append(o),
             setTimeout(function() {
                 $(".chatmsg-box").mCustomScrollbar("update").mCustomScrollbar("scrollTo", "999999")
@@ -416,42 +401,47 @@
       function(t) {
         console.log(t)
       }),
-    VHALL_SDK.on("playerReady",function() {
-      VHALL_SDK.player.on("canPlayLines",function(t) {
-        var o = "";
-        t.forEach(function(t) {
-          o += "<li>" + t + "</li>"
-        }),
-          $("#lines").html(o).find("li").eq(0).addClass("active")
-      }),
-        VHALL_SDK.player.on("canPlayDefinitions",function(t) {
+      VHALL_SDK.on("playerReady",function() {
+        VHALL_SDK.player.on("canPlayLines",function(t) {
           var o = "";
           t.forEach(function(t) {
             o += "<li>" + t + "</li>"
           }),
-            $("#definitions").html(o).find("li").eq(0).addClass("active")
-        })
-    }),
-    $(".sign-header>img").click(function(t) {
-      t.stopPropagation(),
-        $(".sign").removeClass("active"),
-        $(".sign .sign-second").text("0秒")
-    }),
-    $(".help-tool").click(function(t) {
-      $("#userEvent").toggleClass("active"),
-        setTimeout(function() {
-            $("#userData").toggleClass("active")
-          },
-          100),
-        setTimeout(function() {
-            $("#exchange").toggleClass("active")
-          },
-          200),
-        setTimeout(function() {
-            $("#hideVideo").toggleClass("active")
-          },
-          300)
-    })
+            $("#lines").html(o).find("li").eq(0).addClass("active")
+        }),
+          VHALL_SDK.player.on("canPlayDefinitions",function(t) {
+            var o = "";
+            t.forEach(function(t) {
+              o += "<li>" + t + "</li>"
+            }),
+              $("#definitions").html(o).find("li").eq(0).addClass("active")
+          })
+      }),
+      $(".sign-header>img").click(function(t) {
+        t.stopPropagation(),
+          $(".sign").removeClass("active"),
+          $(".sign .sign-second").text("0秒")
+      }),
+      $(".help-tool").click(function(t) {
+        $("#userEvent").toggleClass("active"),
+          setTimeout(function() {
+              $("#userData").toggleClass("active")
+            },
+            100),
+          setTimeout(function() {
+              $("#exchange").toggleClass("active")
+            },
+            200),
+          setTimeout(function() {
+              $("#hideVideo").toggleClass("active")
+            },
+            300)
+      })
+    },
+    methods: {
+
+    }
+  };
 
 </script>
 <!--<script type="text/template" id="chat-template">-->

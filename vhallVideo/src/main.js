@@ -3,9 +3,7 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
-// import $ from '../node_modules/jquery/dist/jquery.min';
-import $ from 'jquery';
-
+import './plugins'
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */

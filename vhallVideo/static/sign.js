@@ -1,5 +1,4 @@
-console.log(666);
-
+import createHash from './md5';
 export default function sign(){
         var timestamp = Date.parse(new Date());
         var secret_key = "12ba730215da33922dad3e8d8f279759";
